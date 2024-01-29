@@ -4,11 +4,13 @@
 # Project #1 
 
 import nltk # Package for tokenization and normalization
+from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 import re # Regex package
-import contractions
+import contractions 
 
 nltk.download('punkt') # Download tokenizer
+nltk.download('stopwords') # Download stop words
 
 # Desc.: Takes a string and performs tokenizationa and normalization
 # Input: String of text
@@ -25,13 +27,16 @@ def process_string(str):
     tokenized_list = nltk.word_tokenize(expanded_str)
     # Remove punctuation
     filtered_list = [word for word in tokenized_list if word.isalpha()]
+    # Remove stop words
+    filtered_list = [word for word in filtered_list if not word in stop_words]
     # Stemm words
     sb = SnowballStemmer('english')
     stemmed_list = [sb.stem(words_sent) for words_sent in filtered_list]
     return stemmed_list
- 
+
 # Main Method
 if __name__ == '__main__':
+    stop_words = set(stopwords.words('english')) # List of stop words
     # NOTE: This is just for testing
     s = open('docs\\food_1.txt').read()
     list = process_string(s)
