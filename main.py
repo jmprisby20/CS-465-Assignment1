@@ -52,7 +52,10 @@ def update_word_count_for_doc(word_list):
 # Desc.: Go through all files in doc folder and update word counter and inverse index
 # NOTE: For some reason if I clear dictionary in this method it will remain clear even after completion
 #       So instead perform the clear elsewhere to remove any words which are no longer present.
+# Output: Returns a list of the following format: [ inverse_index, word_count]
 def refresh_counters():
+    i_index = {} # Return value for inverse index
+    w_count = {} # Return value for word count
     for file_name in os.listdir('docs'):
         path = os.path.join('docs', file_name)
         # Check file then process
@@ -61,8 +64,17 @@ def refresh_counters():
             file_contents = open(path, encoding='utf-8').read()
             word_list = process_string(file_contents)
             # Update Word counter
-            doc_word_count[file_name] = update_word_count_for_doc(word_list)
-            # Update Inverse Index
+            w_count[file_name] = update_word_count_for_doc(word_list)
+            # Update inverse Index
+            word_list_no_dup = list(set(word_list)) # Converting to set removes duplicates, covert back to list after
+            for word in word_list_no_dup:
+                if word in i_index:
+                    # Here word already exist, append file name to posting list
+                    i_index[word].append(file_name)
+                else:
+                    # Here this word isn't already in index, create list storing this files name
+                    i_index[word] = [file_name]
+    return [ i_index, w_count ]
 
 # Desc.: Get the number of times a given word occurs in a given document
 # Output: Integer value of number occurence    
@@ -70,21 +82,31 @@ def num_count_of_word_in_doc(file_name, word):
     try:
         return doc_word_count[file_name][word]
     except:
+        # Here word was not in document
         return 0
+    
+# Desc.: Retrieves the number of unique terms in document
+# Input: name of file (Not the path)
+# Output: number of unique words in the file ( After normalization and tokenization )
+def get_num_unique_words_per_doc(file_name):
+    word_count = doc_word_count[file_name]
+    return len(word_count.keys())
+
+# Desc.: Retrieves the word count for a document
+# Input: name of file (Not the path)
+# Output: Total number of words in document ( After normalization and tokenization )
+def get_word_count_in_doc(file_name):
+    word_count = doc_word_count[file_name]
+    sum = 0
+    for word in word_count.keys():
+        sum+= word_count[word]
+    return sum
+
+
 
 # Main Method
 if __name__ == '__main__':
-    reverse_index = {}
-
-    # NOTE: The value below is a dictionary which will store the word counts for each document
-    #       The key in the dictionary is the file name
-    #       The value stored per key is a dictionary that stores the word count for every word in that document
-    doc_word_count = {} 
-
-    refresh_counters()
-    
-    a = num_count_of_word_in_doc('entertainment_1.txt', 'jakekek')
-    print(a)
+    inverse_index, doc_word_count = refresh_counters()
     
 
     
