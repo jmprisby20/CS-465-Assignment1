@@ -18,6 +18,7 @@ nltk.download('stopwords') # Download stop words
 # Output: list of normalized words
 # NOTE: This function is written following the tutorial found at: https://towardsdatascience.com/text-normalization-for-natural-language-processing-nlp-70a314bfa646
 def process_string(str):
+    str = str.lower()
     # First expand contractions
     expanded = [] # Create List to store each word
     # Iterate over words in string
@@ -73,7 +74,9 @@ class InfoRetrieval:
     def __init__(self):
         self.inverted_index = {}
         self.word_counter = {}
+        self.word_rankings = [] 
         self.refresh_structures()
+        
 
     def refresh_structures(self):
         # Reset the structures
@@ -99,7 +102,28 @@ class InfoRetrieval:
                         self.inverted_index[word].append(file_name)
                     else:
                         self.inverted_index[word] = [file_name]
-    
+        self.rank_words()
+
+    def get_nth_most_frequent_word():
+        pass
+
+    def rank_words(self):
+        self.word_rankings = [] # Clear rankings list
+        for word in self.inverted_index:
+            word_count = self.word_total_occurence(word)
+            self.word_rankings.append( (word, word_count) )
+        # Sort results
+        self.word_rankings = sorted(self.word_rankings, key=lambda x: x[1], reverse= True)
+    def word_total_occurence(self, word):
+        count = 0
+        try:
+            doc_list = self.inverted_index[word]
+            for doc in doc_list:
+                count += self.word_counter[doc][word]
+        except:
+            pass
+        return count
+
     def collection_total_word_count(self):
         count = 0
         for doc in self.word_counter:
@@ -134,5 +158,4 @@ class InfoRetrieval:
         except:
             pass
         return res
-    
     

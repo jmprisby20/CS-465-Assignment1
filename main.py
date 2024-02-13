@@ -9,4 +9,4 @@ from pack.InfoRetrieval import soundex
 import unicodedata 
 if __name__ == '__main__':
     IR = InfoRetrieval() # Information retrieval object
-    
+    print(IR.word_rankings)
