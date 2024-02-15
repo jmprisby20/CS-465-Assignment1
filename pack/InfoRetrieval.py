@@ -104,8 +104,8 @@ class InfoRetrieval:
                         self.inverted_index[word] = [file_name]
         self.rank_words()
 
-    def get_nth_most_frequent_word():
-        pass
+    def get_nth_most_frequent_word(self, n):
+        return self.word_rankings[n]
 
     def rank_words(self):
         self.word_rankings = [] # Clear rankings list
@@ -114,6 +114,7 @@ class InfoRetrieval:
             self.word_rankings.append( (word, word_count) )
         # Sort results
         self.word_rankings = sorted(self.word_rankings, key=lambda x: x[1], reverse= True)
+
     def word_total_occurence(self, word):
         count = 0
         try:
@@ -146,16 +147,18 @@ class InfoRetrieval:
     def binary_query(self, term1, term2, op):
         res = []
         try:
-            # Convert inverted index entries for both words into sets
-            set1 = set(self.inverted_index[term1])
-            set2 = set(self.inverted_index[term2])
+            # Convert inverted index entries for both words into sets 
+            set1 = set(self.inverted_index.get(term1, []))
+            set2 = set(self.inverted_index.get(term2, []))
             # Perform set operations for query operation
             if op == 'and':
+                print('and')
                 res = set1.intersection(set2)
             else:
+                print('or')
                 res = set1.union(set2)
             res = list(res)
-        except:
-            pass
+        except Exception as e:
+            print(e)
         return res
     
