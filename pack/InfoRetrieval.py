@@ -6,8 +6,7 @@
 import nltk # Package for tokenization and normalization
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
-import re # Regex package
-import contractions 
+#import contractions 
 import os
 
 nltk.download('punkt') # Download tokenizer
@@ -19,14 +18,16 @@ nltk.download('stopwords') # Download stop words
 # NOTE: This function is written following the tutorial found at: https://towardsdatascience.com/text-normalization-for-natural-language-processing-nlp-70a314bfa646
 def process_string(str):
     str = str.lower()
+    # NOTE: This is commented out due to issues with contracitons library
     # First expand contractions
-    expanded = [] # Create List to store each word
+    #expanded = [] # Create List to store each word
     # Iterate over words in string
-    for word in str.split():
-        expanded.append(contractions.fix(word)) # Store expanded word in list
-    expanded_str = " ".join(expanded) # Join list into string
+    #for word in str.split():
+    #    expanded.append(contractions.fix(word)) # Store expanded word in list
+    #expanded_str = " ".join(expanded) # Join list into string
     # Tokenize string
-    tokenized_list = nltk.word_tokenize(expanded_str)
+    #tokenized_list = nltk.word_tokenize(expanded_str)
+    tokenized_list = nltk.word_tokenize(str)
     # Remove punctuation
     filtered_list = [word for word in tokenized_list if word.isalpha()]
     # Remove stop words
@@ -47,6 +48,7 @@ def document_word_counter(doc_contents):
             word_count[word] = 1
     return word_count
 
+# Desc.: Converts word into its soundex code
 def soundex(word):
     soundex_dict = {'b': '1', 'f': '1', 'p': '1', 'v': '1',
                     'c': '2', 'g': '2', 'j': '2', 'k': '2', 'q': '2', 's': '2', 'x': '2', 'z': '2',
@@ -69,12 +71,13 @@ def soundex(word):
     soundex_code = soundex_code[:4].ljust(4, '0')
     return soundex_code.upper()
 
+# Class used to store and perform operations on word counters and inverted index
 class InfoRetrieval:
 
     def __init__(self):
         self.inverted_index = {}
         self.word_counter = {}
-        self.word_rankings = [] 
+        self.word_rankings = [] # Stores the words in order of most frequent in tuple along with its frequency
         self.refresh_structures()
         
 
@@ -104,9 +107,11 @@ class InfoRetrieval:
                         self.inverted_index[word] = [file_name]
         self.rank_words()
 
+    # Desc.: Retrieves the nth most frequently occuring word in the collection
     def get_nth_most_frequent_word(self, n):
         return self.word_rankings[n]
 
+    # Desc.: Puts all words in tuple with their frequency and inserts them in a sorted list
     def rank_words(self):
         self.word_rankings = [] # Clear rankings list
         for word in self.inverted_index:
@@ -115,6 +120,7 @@ class InfoRetrieval:
         # Sort results
         self.word_rankings = sorted(self.word_rankings, key=lambda x: x[1], reverse= True)
 
+    # Desc.: Get the total amount of times a word occurs in the collection
     def word_total_occurence(self, word):
         count = 0
         try:
@@ -125,6 +131,7 @@ class InfoRetrieval:
             pass
         return count
 
+    # Desc.: Retrieve the total number of words that are in the collection
     def collection_total_word_count(self):
         count = 0
         for doc in self.word_counter:
@@ -132,18 +139,22 @@ class InfoRetrieval:
                 count+= self.word_counter[doc][word]
         return count
     
+    # Desc.: Retrieves the total number of unqiue words in the collection
     def collection_unique_word_count(self):
         return len(self.inverted_index)
 
+    # Desc.: Retrieves the total number of words in a given document
     def doc_total_word_count(self, doc_name):
         count = 0
         for word in self.word_counter[doc_name]:
             count+= self.word_counter[doc_name][word]
         return count
 
+    # Desc.: Retrieves the total number of unique words in a given document
     def doc_unique_word_count(self, doc_name):
         return len(self.word_counter[doc_name])
 
+    # Desc.: Performs a binary query on inverted index for two words (AND, OR)
     def binary_query(self, term1, term2, op):
         res = []
         try:
@@ -152,10 +163,8 @@ class InfoRetrieval:
             set2 = set(self.inverted_index.get(term2, []))
             # Perform set operations for query operation
             if op == 'and':
-                print('and')
                 res = set1.intersection(set2)
             else:
-                print('or')
                 res = set1.union(set2)
             res = list(res)
         except Exception as e:

@@ -62,8 +62,10 @@ class App:
         self.query_res_tb.grid(row=2, column=0, columnspan=5, padx=10, pady=(0, 10))
         self.query_res_tb.config(state=tk.DISABLED)
 
+    # Button event for query submit button
     def on_query_submit(self):
-        res = []
+        res = [] # Store query result
+        # Get the inputs and perform normalization
         try:
             try:
                 word1 = self.query_entry1.get()
@@ -75,21 +77,26 @@ class App:
             except:
                 word2 = ''
             word2 = process_string(word2)[0]
+            # Perform query with processed strings
             res = IR.binary_query(word1, word2, self.query_op)
         except: 
             pass
+        # Display results
         self.query_res_tb.config(state=tk.NORMAL)
         self.query_res_tb.delete('1.0', 'end')
         self.query_res_tb.insert(tk.END, str(res))
         self.query_res_tb.config(state=tk.DISABLED)
         
+    # Desc.: Button event for the query op button
     def query_op_switch(self):
+        # Switch the current operation
         if self.query_op == 'and':
             self.query_op = 'or'
         else:
             self.query_op = 'and'
-        self.operation_button.config(text=self.query_op.upper())
+        self.operation_button.config(text=self.query_op.upper()) # Update text
 
+    # Desc.: Creates widgets for the word stats tab
     def create_stats_tab(self):
         # Widgets for Statistics Tab
         self.stat_scroll_bar_frame = ttk.Frame(self.stats_frame)
@@ -103,7 +110,6 @@ class App:
         self.stat_scroll.pack(side='right', fill='both')
         self.stats_listbox.config(yscrollcommand= self.stat_scroll.set)
         self.stat_scroll.config(command = self.stats_listbox.yview)
-
 
         self.stat_tb_scroll_bar_frame = ttk.Frame(self.stats_frame)
         self.stat_tb_scroll_bar_frame.pack(side='right', fill='both', expand='true')
@@ -122,7 +128,8 @@ class App:
         words = sorted(IR.inverted_index.keys())
         for word in words:
             self.stats_listbox.insert(tk.END, word)
-
+    
+    # Desc.: Click event for the listbox of words
     def on_word_select(self, event):
         selected_word = self.stats_listbox.get(self.stats_listbox.curselection())
 
@@ -148,8 +155,8 @@ class App:
         self.stats_tb.insert(tk.END, str)
         self.stats_tb.config(state=tk.DISABLED)
 
+    # Desc.: Creates widgets for the document stats tab
     def create_doc_tab(self):
-        # Widgets for Inverted Index Tab
         self.doc_scrollbar_frame = ttk.Frame(self.doc_stats_frame)
         self.doc_scrollbar_frame.pack(side='left', fill='both', expand=True)
 
@@ -169,20 +176,24 @@ class App:
         for doc in docs:
             self.doc_stats_listbox.insert(tk.END, doc)
 
+    # Desc.: Click event for the document listbox
     def on_doc_select(self, event):
-        selected_doc = self.doc_stats_listbox.get(self.doc_stats_listbox.curselection())
-        str = 'Document Specific Stats:\n'
-        str += f'Document: {selected_doc}\n'
-        str += f"Distinct Words: {IR.doc_unique_word_count(selected_doc)}\n"
-        str += f'Total Words: {IR.doc_total_word_count(selected_doc)}\n'
+        try:
+            selected_doc = self.doc_stats_listbox.get(self.doc_stats_listbox.curselection())
+            str = 'Document Specific Stats:\n'
+            str += f'Document: {selected_doc}\n'
+            str += f"Distinct Words: {IR.doc_unique_word_count(selected_doc)}\n"
+            str += f'Total Words: {IR.doc_total_word_count(selected_doc)}\n'
 
-        str += '\nCollection Stats: \n'
-        str += f'Distinct Words: {IR.collection_unique_word_count()}\n'
-        str += f"Total Words: {IR.collection_total_word_count()}\n"
-        self.doc_stats_tb.config(state=tk.NORMAL)
-        self.doc_stats_tb.delete('1.0', 'end')
-        self.doc_stats_tb.insert(tk.END, str)
-        self.doc_stats_tb.config(state=tk.DISABLED)
+            str += '\nCollection Stats: \n'
+            str += f'Distinct Words: {IR.collection_unique_word_count()}\n'
+            str += f"Total Words: {IR.collection_total_word_count()}\n"
+            self.doc_stats_tb.config(state=tk.NORMAL)
+            self.doc_stats_tb.delete('1.0', 'end')
+            self.doc_stats_tb.insert(tk.END, str)
+            self.doc_stats_tb.config(state=tk.DISABLED)
+        except:
+            pass
 
 
 if __name__ == '__main__':
